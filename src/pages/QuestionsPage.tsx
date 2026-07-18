@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
-import { createId, typeLabels } from '../lib/quiz';
+import { createId, formatTimeLimit, typeLabels } from '../lib/quiz';
 import { useRoomSnapshot } from '../hooks/useRoomSnapshot';
 import { Question, QuestionType } from '../types';
 
@@ -232,10 +232,37 @@ export function QuestionsPage() {
             </select>
           )}
         </label>
-        <label>
-          制限時間
-          <input type="number" min={5} max={300} value={editingQuestion.timeLimit} onChange={(event) => setEditing({ ...editingQuestion, timeLimit: Number(event.target.value) })} />
-        </label>
+        <div>
+          <label className="checkRow">
+            <input
+              type="checkbox"
+              checked={editingQuestion.timeLimit > 0}
+              onChange={(event) =>
+                setEditing({
+                  ...editingQuestion,
+                  timeLimit: event.target.checked
+                    ? Math.max(snapshotData.room.defaultTimeLimit || 30, 5)
+                    : 0,
+                })
+              }
+            />
+            制限時間を使用する
+          </label>
+          {editingQuestion.timeLimit > 0 ? (
+            <label className="stackedControl">
+              制限時間
+              <input
+                type="number"
+                min={5}
+                max={300}
+                value={editingQuestion.timeLimit}
+                onChange={(event) => setEditing({ ...editingQuestion, timeLimit: Number(event.target.value) })}
+              />
+            </label>
+          ) : (
+            <p className="smallNote noLimitNote">この問題は時間制限なしです。</p>
+          )}
+        </div>
         <label>
           得点
           <input type="number" min={1} value={editingQuestion.points} onChange={(event) => setEditing({ ...editingQuestion, points: Number(event.target.value) })} />
@@ -302,7 +329,7 @@ export function QuestionsPage() {
                   {index + 1}. {question.prompt || '無題の問題'}
                 </strong>
                 <span>
-                  {typeLabels[question.type]} / {question.points}点 {question.draft ? '/ 下書き' : ''}
+                  {typeLabels[question.type]} / {formatTimeLimit(question.timeLimit)} / {question.points}点 {question.draft ? '/ 下書き' : ''}
                 </span>
               </div>
               <div className="miniActions">

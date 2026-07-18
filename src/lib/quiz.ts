@@ -51,7 +51,7 @@ export function elapsedSince(startedAt?: string) {
 export function calculatePoints(room: Room, question: Question, isCorrect: boolean, elapsedMs: number) {
   if (!isCorrect) return 0;
   const base = question.points || room.pointsPerCorrect;
-  if (!room.useSpeedBonus) return base;
+  if (!room.useSpeedBonus || question.timeLimit <= 0) return base;
   const limitMs = Math.max(1, question.timeLimit) * 1000;
   const remainingRatio = Math.max(0, (limitMs - elapsedMs) / limitMs);
   return base + Math.round(base * 0.3 * remainingRatio);
@@ -98,4 +98,8 @@ export function buildRanking(room: Room, participants: Participant[], answers: A
 
 export function formatTimer(ms: number) {
   return Math.max(0, Math.ceil(ms / 1000));
+}
+
+export function formatTimeLimit(seconds: number) {
+  return seconds > 0 ? `${seconds}秒` : '制限なし';
 }

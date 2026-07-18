@@ -270,6 +270,18 @@ textarea:focus {
   width: 24px;
 }
 
+.checkRow input:disabled {
+  cursor: not-allowed;
+}
+
+.stackedControl {
+  margin-top: 12px;
+}
+
+.noLimitNote {
+  margin: 12px 0 0;
+}
+
 .button {
   align-items: center;
   border: 0;
@@ -552,6 +564,11 @@ textarea:focus {
   margin: 18px 0;
   padding: 14px;
   text-align: center;
+}
+
+.noLimitTimer {
+  background: #e4efe9;
+  color: #245443;
 }
 
 .choiceGrid {

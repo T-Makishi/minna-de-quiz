@@ -9,6 +9,7 @@ export function CreateRoomPage() {
     title: '今日のクイズ大会',
     hostName: '',
     adminPin: '',
+    timeLimitEnabled: true,
     defaultTimeLimit: 30,
     useRanking: true,
     pointsPerCorrect: 100,
@@ -36,6 +37,8 @@ export function CreateRoomPage() {
         ...form,
         title: form.title.trim(),
         hostName: form.hostName.trim(),
+        defaultTimeLimit: form.timeLimitEnabled ? form.defaultTimeLimit : 0,
+        useSpeedBonus: form.timeLimitEnabled ? form.useSpeedBonus : false,
       });
       saveHostPin(room.id, form.adminPin);
       navigate(`/host/${room.id}`);
@@ -71,16 +74,36 @@ export function CreateRoomPage() {
             onChange={(event) => setForm({ ...form, adminPin: event.target.value.replace(/\D/g, '').slice(0, 6) })}
           />
         </label>
-        <label>
-          制限時間の初期設定
-          <input
-            type="number"
-            min={5}
-            max={300}
-            value={form.defaultTimeLimit}
-            onChange={(event) => setForm({ ...form, defaultTimeLimit: Number(event.target.value) })}
-          />
-        </label>
+        <div>
+          <label className="checkRow">
+            <input
+              type="checkbox"
+              checked={form.timeLimitEnabled}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  timeLimitEnabled: event.target.checked,
+                  useSpeedBonus: event.target.checked ? form.useSpeedBonus : false,
+                })
+              }
+            />
+            制限時間を使用する
+          </label>
+          {form.timeLimitEnabled ? (
+            <label className="stackedControl">
+              制限時間の初期設定
+              <input
+                type="number"
+                min={5}
+                max={300}
+                value={form.defaultTimeLimit}
+                onChange={(event) => setForm({ ...form, defaultTimeLimit: Number(event.target.value) })}
+              />
+            </label>
+          ) : (
+            <p className="smallNote noLimitNote">各問題は時間制限なしで作成されます。</p>
+          )}
+        </div>
         <label>
           正解時の得点
           <input
@@ -113,6 +136,7 @@ export function CreateRoomPage() {
           <input
             type="checkbox"
             checked={form.useSpeedBonus}
+            disabled={!form.timeLimitEnabled}
             onChange={(event) => setForm({ ...form, useSpeedBonus: event.target.checked })}
           />
           回答速度ボーナスを使用する

@@ -130,7 +130,8 @@ export function PlayPage() {
   );
   const myRank = ranking.find((row) => row.participant.id === participant?.id);
   const elapsedMs = elapsedSince(snapshot?.room.phaseStartedAt);
-  const remainingMs = question ? question.timeLimit * 1000 - elapsedMs : 0;
+  const hasTimeLimit = Boolean(question && question.timeLimit > 0);
+  const remainingMs = question && hasTimeLimit ? question.timeLimit * 1000 - elapsedMs : 0;
   const secondsLeft = formatTimer(remainingMs + tick * 0);
 
   async function submitAnswer(value: string) {
@@ -250,7 +251,11 @@ export function PlayPage() {
       <h1>{question.prompt}</h1>
       {question.note && <p className="bigText">{question.note}</p>}
       {question.imageUrl && <img className="questionImage" src={question.imageUrl} alt="" />}
-      <div className="timer">残り {Math.max(0, secondsLeft)} 秒</div>
+      {hasTimeLimit ? (
+        <div className="timer">残り {Math.max(0, secondsLeft)} 秒</div>
+      ) : (
+        <div className="timer noLimitTimer">制限時間なし</div>
+      )}
 
       {snapshot.room.status === 'question' && <p className="muted">回答受付開始までお待ちください。</p>}
       {snapshot.room.status === 'closed' && <p className="muted">回答受付は終了しました。正解発表をお待ちください。</p>}

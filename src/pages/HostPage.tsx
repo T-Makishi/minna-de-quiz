@@ -2,7 +2,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { FormEvent, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
-import { activeQuestion, buildRanking, statusLabels } from '../lib/quiz';
+import { activeQuestion, buildRanking, formatTimeLimit, statusLabels } from '../lib/quiz';
 import { loadHostPin, saveHostPin } from '../lib/storage';
 import { useRoomSnapshot } from '../hooks/useRoomSnapshot';
 import { Ranking } from '../ui/Ranking';
@@ -117,7 +117,7 @@ export function HostPage() {
         <h2>
           {question ? `${snapshot.room.currentQuestionIndex + 1}. ${question.prompt}` : '問題がまだありません'}
         </h2>
-        <p>{question ? `${question.timeLimit}秒 / ${question.points}点` : '問題編集画面で追加してください。'}</p>
+        <p>{question ? `${formatTimeLimit(question.timeLimit)} / ${question.points}点` : '問題編集画面で追加してください。'}</p>
       </div>
 
       <div className="panel controlGrid">
