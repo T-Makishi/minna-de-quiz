@@ -58,19 +58,21 @@ export function QuestionPrintPage() {
                   <span>問題 {index + 1}</span>
                   <h3>{question.prompt || '無題の問題'}</h3>
                   {question.note && <p>{question.note}</p>}
-                  {question.type !== 'text' && (
-                    <ol>
-                      {question.options.map((option, optionIndex) => (
-                        <li key={`${optionIndex}-${option}`}>{stripChoicePrefix(option)}</li>
-                      ))}
-                    </ol>
-                  )}
+                  <div className={question.imageUrl ? 'participantPrintBody withImage' : 'participantPrintBody'}>
+                    {question.type !== 'text' && (
+                      <ol>
+                        {question.options.map((option, optionIndex) => (
+                          <li key={`${optionIndex}-${option}`}>{stripChoicePrefix(option)}</li>
+                        ))}
+                      </ol>
+                    )}
+                    {question.imageUrl && (
+                      <figure className="participantPrintImage">
+                        <img src={question.imageUrl} alt={`問題${index + 1}の画像`} />
+                      </figure>
+                    )}
+                  </div>
                 </div>
-                {question.imageUrl && (
-                  <figure className="participantPrintImage">
-                    <img src={question.imageUrl} alt={`問題${index + 1}の画像`} />
-                  </figure>
-                )}
               </section>
             ))}
             {questions.length === 0 && <p className="muted">印刷できる問題がありません。</p>}
