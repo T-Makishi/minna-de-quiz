@@ -110,7 +110,7 @@ const localApi = {
         questionCount: db.questions.filter((question) => question.roomId === room.id && !question.draft).length,
       }));
   },
-  async copyQuestions(sourceRoomId: string, targetRoomId: string) {
+  async copyQuestions(sourceRoomId: string, targetRoomId: string, startIndex = 0) {
     const db = loadDb();
     const sourceQuestions = db.questions
       .filter((question) => question.roomId === sourceRoomId && !question.draft)
@@ -119,7 +119,7 @@ const localApi = {
       ...question,
       id: createId('question'),
       roomId: targetRoomId,
-      orderIndex: index,
+      orderIndex: startIndex + index,
       draft: false,
       createdAt: now(),
     }));
@@ -430,7 +430,7 @@ const supabaseApi = supabase
           };
         });
       },
-      async copyQuestions(sourceRoomId: string, targetRoomId: string) {
+      async copyQuestions(sourceRoomId: string, targetRoomId: string, startIndex = 0) {
         const { data, error } = await supabase
           .from('questions')
           .select('*')
@@ -444,7 +444,7 @@ const supabaseApi = supabase
             ...question,
             id: createId('question'),
             roomId: targetRoomId,
-            orderIndex: index,
+            orderIndex: startIndex + index,
             draft: false,
             createdAt: now(),
           });
@@ -455,8 +455,14 @@ const supabaseApi = supabase
         return copied.length;
       },
       async deleteRoom(roomId: string) {
-        const { error } = await supabase.from('rooms').delete().eq('id', roomId);
-        if (error) throw new Error('過去大会を削除できませんでした。');
+        const answerDelete = await supabase.from('answers').delete().eq('room_id', roomId);
+        const questionDelete = await supabase.from('questions').delete().eq('room_id', roomId);
+        const participantDelete = await supabase.from('participants').delete().eq('room_id', roomId);
+        const roomDelete = await supabase.from('rooms').delete().eq('id', roomId);
+        const error = answerDelete.error || questionDelete.error || participantDelete.error || roomDelete.error;
+        if (error) {
+          throw new Error('過去大会を削除できませんでした。Supabase SQL Editorで room_delete_policy.sql を実行してください。');
+        }
       },
       async getRoomByCode(code: string) {
         const { data } = await supabase.from('rooms').select('*').eq('code', code).maybeSingle();

@@ -183,6 +183,29 @@ main {
   gap: 10px;
 }
 
+.historyBulkActions {
+  align-items: center;
+  background: #f0eee6;
+  border: 1px solid #ddd5c5;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.historyBulkActions span {
+  color: #45605b;
+  font-weight: 900;
+}
+
+.historyBulkActions div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .historyItem {
   align-items: center;
   background: #fffaf0;
@@ -214,6 +237,7 @@ label.historyItem {
 
 .historyItem input,
 .historyChoice input {
+  accent-color: #2c6e5b;
   height: 22px;
   flex: 0 0 auto;
   width: 22px;

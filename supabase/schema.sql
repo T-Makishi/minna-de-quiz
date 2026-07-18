@@ -95,6 +95,7 @@ create policy "rooms can be deleted by client app" on rooms for delete using (tr
 
 create policy "participants readable" on participants for select using (true);
 create policy "participants insertable" on participants for insert with check (true);
+create policy "participants deletable by client app" on participants for delete using (true);
 
 create policy "questions readable" on questions for select using (true);
 create policy "questions writable" on questions for all using (true) with check (true);

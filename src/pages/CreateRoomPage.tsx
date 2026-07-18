@@ -22,8 +22,9 @@ export function CreateRoomPage() {
   const [saving, setSaving] = useState(false);
   const [roomHistory, setRoomHistory] = useState<RoomSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [sourceRoomId, setSourceRoomId] = useState('');
+  const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
   const [deletingRoomId, setDeletingRoomId] = useState('');
+  const [historyError, setHistoryError] = useState('');
 
   async function loadRoomHistory() {
     setHistoryLoading(true);
@@ -62,16 +63,44 @@ export function CreateRoomPage() {
     if (!ok) return;
     setDeletingRoomId(roomId);
     setError('');
+    setHistoryError('');
     try {
       await api.deleteRoom(roomId);
-      if (sourceRoomId === roomId) setSourceRoomId('');
+      setSelectedRoomIds((ids) => ids.filter((id) => id !== roomId));
       setRoomHistory((items) => items.filter((item) => item.room.id !== roomId));
       await loadRoomHistory();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '過去大会を削除できませんでした。');
+      setHistoryError(err instanceof Error ? err.message : '過去大会を削除できませんでした。');
     } finally {
       setDeletingRoomId('');
     }
+  }
+
+  async function deleteSelectedRooms() {
+    if (selectedRoomIds.length === 0) return;
+    const ok = window.confirm(
+      `選択した${selectedRoomIds.length}件の過去大会を削除しますか？\n\n対象大会の問題・参加者・回答履歴も削除されます。`,
+    );
+    if (!ok) return;
+    setDeletingRoomId('bulk');
+    setError('');
+    setHistoryError('');
+    try {
+      for (const roomId of selectedRoomIds) {
+        await api.deleteRoom(roomId);
+      }
+      setRoomHistory((items) => items.filter((item) => !selectedRoomIds.includes(item.room.id)));
+      setSelectedRoomIds([]);
+      await loadRoomHistory();
+    } catch (err) {
+      setHistoryError(err instanceof Error ? err.message : '過去大会を削除できませんでした。');
+    } finally {
+      setDeletingRoomId('');
+    }
+  }
+
+  function toggleSelectedRoom(roomId: string) {
+    setSelectedRoomIds((ids) => (ids.includes(roomId) ? ids.filter((id) => id !== roomId) : [...ids, roomId]));
   }
 
   async function submit(event: FormEvent) {
@@ -94,8 +123,9 @@ export function CreateRoomPage() {
         defaultTimeLimit: form.timeLimitEnabled ? form.defaultTimeLimit : 0,
         useSpeedBonus: form.timeLimitEnabled ? form.useSpeedBonus : false,
       });
-      if (sourceRoomId) {
-        await api.copyQuestions(sourceRoomId, room.id);
+      let questionOffset = 0;
+      for (const sourceRoomId of selectedRoomIds) {
+        questionOffset += await api.copyQuestions(sourceRoomId, room.id, questionOffset);
       }
       saveHostPin(room.id, form.adminPin);
       navigate(`/host/${room.id}`);
@@ -115,32 +145,30 @@ export function CreateRoomPage() {
       <section className="panel historyPanel">
         <div>
           <h2>過去問を使う</h2>
-          <p className="muted">過去に作成した問題をコピーして、新しい大会として開催できます。</p>
+          <p className="muted">過去に作成した問題を選択して、新しい大会へまとめてコピーできます。</p>
         </div>
         {historyLoading ? (
           <p className="muted">過去問を確認中...</p>
         ) : roomHistory.length > 0 ? (
           <div className="historyList">
-            <label className={`historyItem ${sourceRoomId === '' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                checked={sourceRoomId === ''}
-                name="sourceRoom"
-                onChange={() => setSourceRoomId('')}
-              />
-              <span>
-                <strong>新しく作成する</strong>
-                <small>過去問をコピーせず、空の大会を作ります。</small>
-              </span>
-            </label>
+            <div className="historyBulkActions">
+              <span>{selectedRoomIds.length > 0 ? `${selectedRoomIds.length}件選択中` : '未選択の場合は空の大会を作成します。'}</span>
+              <div>
+                <button className="button secondary small" disabled={selectedRoomIds.length === 0} onClick={() => setSelectedRoomIds([])} type="button">
+                  選択解除
+                </button>
+                <button className="button danger small" disabled={selectedRoomIds.length === 0 || deletingRoomId === 'bulk'} onClick={deleteSelectedRooms} type="button">
+                  {deletingRoomId === 'bulk' ? '削除中...' : '選択した大会を削除'}
+                </button>
+              </div>
+            </div>
             {roomHistory.map(({ room, questionCount }) => (
-              <div className={`historyItem ${sourceRoomId === room.id ? 'selected' : ''}`} key={room.id}>
+              <div className={`historyItem ${selectedRoomIds.includes(room.id) ? 'selected' : ''}`} key={room.id}>
                 <label className="historyChoice">
                   <input
-                    type="radio"
-                    checked={sourceRoomId === room.id}
-                    name="sourceRoom"
-                    onChange={() => setSourceRoomId(room.id)}
+                    type="checkbox"
+                    checked={selectedRoomIds.includes(room.id)}
+                    onChange={() => toggleSelectedRoom(room.id)}
                   />
                   <span>
                     <strong>{room.title}</strong>
@@ -151,7 +179,7 @@ export function CreateRoomPage() {
                 </label>
                 <button
                   className="button danger small"
-                  disabled={deletingRoomId === room.id}
+                  disabled={deletingRoomId === room.id || deletingRoomId === 'bulk'}
                   onClick={() => deletePastRoom(room.id, room.title)}
                   type="button"
                 >
@@ -159,6 +187,7 @@ export function CreateRoomPage() {
                 </button>
               </div>
             ))}
+            {historyError && <p className="error">{historyError}</p>}
           </div>
         ) : (
           <p className="muted">コピーできる過去問はまだありません。まずは新しく大会を作成してください。</p>
