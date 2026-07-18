@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Answer, AppSettings, Participant, Question, QuizStatus, Room, RoomSnapshot } from '../types';
+import { Answer, AppSettings, Participant, Question, QuizStatus, Room, RoomSnapshot, RoomSummary } from '../types';
 import { createId } from './quiz';
 import { buildDefaultSettings, normalizeHomeCopy } from './settings';
 
@@ -100,6 +100,32 @@ const localApi = {
     db.rooms.push(room);
     saveDb(db);
     return room;
+  },
+  async listRooms(): Promise<RoomSummary[]> {
+    const db = loadDb();
+    return [...db.rooms]
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map((room) => ({
+        room,
+        questionCount: db.questions.filter((question) => question.roomId === room.id && !question.draft).length,
+      }));
+  },
+  async copyQuestions(sourceRoomId: string, targetRoomId: string) {
+    const db = loadDb();
+    const sourceQuestions = db.questions
+      .filter((question) => question.roomId === sourceRoomId && !question.draft)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    const copied = sourceQuestions.map((question, index) => ({
+      ...question,
+      id: createId('question'),
+      roomId: targetRoomId,
+      orderIndex: index,
+      draft: false,
+      createdAt: now(),
+    }));
+    db.questions.push(...copied);
+    saveDb(db);
+    return copied.length;
   },
   async getRoomByCode(code: string) {
     return loadDb().rooms.find((room) => room.code === code) || null;
@@ -377,6 +403,48 @@ const supabaseApi = supabase
           if (!error && data) return toRoom(data);
         }
         throw new Error('参加コードを作成できませんでした。もう一度お試しください。');
+      },
+      async listRooms(): Promise<RoomSummary[]> {
+        const [roomsRes, questionsRes] = await Promise.all([
+          supabase.from('rooms').select('*').order('created_at', { ascending: false }),
+          supabase.from('questions').select('room_id,draft'),
+        ]);
+        const questionCounts = new Map<string, number>();
+        for (const question of questionsRes.data || []) {
+          if (question.draft) continue;
+          questionCounts.set(question.room_id, (questionCounts.get(question.room_id) || 0) + 1);
+        }
+        return (roomsRes.data || []).map((row) => {
+          const room = toRoom(row);
+          return {
+            room,
+            questionCount: questionCounts.get(room.id) || 0,
+          };
+        });
+      },
+      async copyQuestions(sourceRoomId: string, targetRoomId: string) {
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('room_id', sourceRoomId)
+          .eq('draft', false)
+          .order('order_index');
+        if (error) throw new Error('過去問を読み込めませんでした。');
+        const copied = (data || []).map((row, index) => {
+          const question = toQuestion(row);
+          return questionRow({
+            ...question,
+            id: createId('question'),
+            roomId: targetRoomId,
+            orderIndex: index,
+            draft: false,
+            createdAt: now(),
+          });
+        });
+        if (copied.length === 0) return 0;
+        const { error: insertError } = await supabase.from('questions').insert(copied);
+        if (insertError) throw new Error('過去問をコピーできませんでした。');
+        return copied.length;
       },
       async getRoomByCode(code: string) {
         const { data } = await supabase.from('rooms').select('*').eq('code', code).maybeSingle();

@@ -1,7 +1,8 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { saveHostPin } from '../lib/storage';
+import { RoomSummary } from '../types';
 
 export function CreateRoomPage() {
   const navigate = useNavigate();
@@ -19,6 +20,27 @@ export function CreateRoomPage() {
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [roomHistory, setRoomHistory] = useState<RoomSummary[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [sourceRoomId, setSourceRoomId] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    api
+      .listRooms()
+      .then((rooms) => {
+        if (active) setRoomHistory(rooms.filter((item) => item.questionCount > 0));
+      })
+      .catch(() => {
+        if (active) setRoomHistory([]);
+      })
+      .finally(() => {
+        if (active) setHistoryLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -40,6 +62,9 @@ export function CreateRoomPage() {
         defaultTimeLimit: form.timeLimitEnabled ? form.defaultTimeLimit : 0,
         useSpeedBonus: form.timeLimitEnabled ? form.useSpeedBonus : false,
       });
+      if (sourceRoomId) {
+        await api.copyQuestions(sourceRoomId, room.id);
+      }
       saveHostPin(room.id, form.adminPin);
       navigate(`/host/${room.id}`);
     } catch (err) {
@@ -55,6 +80,48 @@ export function CreateRoomPage() {
         <h1>クイズを開催する</h1>
         <p>参加コードは作成後に自動で発行されます。</p>
       </div>
+      <section className="panel historyPanel">
+        <div>
+          <h2>過去問を使う</h2>
+          <p className="muted">過去に作成した問題をコピーして、新しい大会として開催できます。</p>
+        </div>
+        {historyLoading ? (
+          <p className="muted">過去問を確認中...</p>
+        ) : roomHistory.length > 0 ? (
+          <div className="historyList">
+            <label className={`historyItem ${sourceRoomId === '' ? 'selected' : ''}`}>
+              <input
+                type="radio"
+                checked={sourceRoomId === ''}
+                name="sourceRoom"
+                onChange={() => setSourceRoomId('')}
+              />
+              <span>
+                <strong>新しく作成する</strong>
+                <small>過去問をコピーせず、空の大会を作ります。</small>
+              </span>
+            </label>
+            {roomHistory.map(({ room, questionCount }) => (
+              <label className={`historyItem ${sourceRoomId === room.id ? 'selected' : ''}`} key={room.id}>
+                <input
+                  type="radio"
+                  checked={sourceRoomId === room.id}
+                  name="sourceRoom"
+                  onChange={() => setSourceRoomId(room.id)}
+                />
+                <span>
+                  <strong>{room.title}</strong>
+                  <small>
+                    {questionCount}問 / {new Date(room.createdAt).toLocaleDateString('ja-JP')} 作成
+                  </small>
+                </span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">コピーできる過去問はまだありません。まずは新しく大会を作成してください。</p>
+        )}
+      </section>
       <form className="panel formGrid" onSubmit={submit}>
         <label>
           クイズ大会名

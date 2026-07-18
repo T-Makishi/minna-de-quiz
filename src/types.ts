@@ -72,6 +72,11 @@ export type RoomSnapshot = {
   answers: Answer[];
 };
 
+export type RoomSummary = {
+  room: Room;
+  questionCount: number;
+};
+
 export type RankingRow = {
   participant: Participant;
   rank: number;
