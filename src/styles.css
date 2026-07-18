@@ -839,6 +839,24 @@ textarea:focus {
   gap: 12px;
 }
 
+.roomBulkActions {
+  align-items: center;
+  background: #eee8dc;
+  border: 1px solid #ded5c5;
+  border-radius: 8px;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.roomBulkActions div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .roomManageItem {
   align-items: start;
   background: #faf7ef;
@@ -846,8 +864,30 @@ textarea:focus {
   border-radius: 8px;
   display: grid;
   gap: 16px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   padding: 16px;
+}
+
+.roomManageItem.selected {
+  background: #eef8f3;
+  border-color: #9fc7ba;
+}
+
+.roomSelect {
+  align-items: center;
+  color: #61706d;
+  cursor: pointer;
+  display: grid;
+  font-size: 0.8rem;
+  font-weight: 900;
+  gap: 6px;
+  justify-items: center;
+  padding-top: 8px;
+}
+
+.roomSelect input {
+  height: 28px;
+  width: 28px;
 }
 
 .roomManageItem h2 {
@@ -1289,6 +1329,25 @@ textarea:focus {
   .roomManageItem,
   .roomManageItem dl {
     grid-template-columns: 1fr;
+  }
+
+  .roomBulkActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .roomBulkActions div {
+    justify-content: stretch;
+  }
+
+  .roomBulkActions .button {
+    flex: 1;
+  }
+
+  .roomSelect {
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    padding-top: 0;
   }
 
   .roomManageActions {
