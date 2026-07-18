@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { hasAccessGrant, isAccessLockEnabled, revokeAccess } from '../lib/accessLock';
 import { api, isSupabaseEnabled } from '../lib/api';
 import { buildDefaultSettings } from '../lib/settings';
@@ -8,8 +8,10 @@ import { AppSettingsContext } from '../hooks/useAppSettings';
 import { AccessLock } from './AccessLock';
 
 export function AppShell() {
+  const location = useLocation();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [unlocked, setUnlocked] = useState(false);
+  const isInvitePage = location.pathname.startsWith('/invite/');
 
   async function refreshSettings() {
     const next = await api.getAppSettings();
@@ -38,7 +40,7 @@ export function AppShell() {
     );
   }
 
-  if (!unlocked) {
+  if (!unlocked && !isInvitePage) {
     return <AccessLock accessPassphraseHash={settings.accessPassphraseHash} onUnlock={() => setUnlocked(true)} />;
   }
 
@@ -50,24 +52,26 @@ export function AppShell() {
             <span className="brandMark">問</span>
             <span>{settings.homeCopy.title}</span>
           </Link>
-          <div className="topbarActions">
-            <span className="syncBadge">{isSupabaseEnabled ? 'Supabase同期' : 'ローカル体験版'}</span>
-            <Link className="textButton" to="/settings">
-              アプリ設定
-            </Link>
-            {isAccessLockEnabled(settings.accessPassphraseHash) && (
-              <button
-                className="textButton"
-                type="button"
-                onClick={() => {
-                  revokeAccess();
-                  setUnlocked(false);
-                }}
-              >
-                ロック
-              </button>
-            )}
-          </div>
+          {!isInvitePage && (
+            <div className="topbarActions">
+              <span className="syncBadge">{isSupabaseEnabled ? 'Supabase同期' : 'ローカル体験版'}</span>
+              <Link className="textButton" to="/settings">
+                アプリ設定
+              </Link>
+              {isAccessLockEnabled(settings.accessPassphraseHash) && (
+                <button
+                  className="textButton"
+                  type="button"
+                  onClick={() => {
+                    revokeAccess();
+                    setUnlocked(false);
+                  }}
+                >
+                  ロック
+                </button>
+              )}
+            </div>
+          )}
         </header>
         <main>
           <Outlet />

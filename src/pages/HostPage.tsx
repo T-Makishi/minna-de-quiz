@@ -17,11 +17,37 @@ export function HostPage() {
 
   const authorized = snapshot && pin === snapshot.room.adminPin;
   const publicUrl = snapshot ? `${window.location.origin}${import.meta.env.BASE_URL}#/play/${snapshot.room.code}` : '';
+  const inviteUrl = snapshot ? `${window.location.origin}${import.meta.env.BASE_URL}#/invite/${snapshot.room.code}` : '';
   const question = snapshot ? activeQuestion(snapshot.room, snapshot.questions) : undefined;
   const ranking = useMemo(
     () => (snapshot ? buildRanking(snapshot.room, snapshot.participants, snapshot.answers) : []),
     [snapshot],
   );
+  const [copyMessage, setCopyMessage] = useState('');
+
+  async function copyText(text: string, message: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyMessage(message);
+    } catch {
+      setCopyMessage('コピーできませんでした。URLまたは案内文を選択してコピーしてください。');
+    }
+    window.setTimeout(() => setCopyMessage(''), 2500);
+  }
+
+  function buildInviteMessage() {
+    if (!snapshot) return '';
+    return [
+      `${snapshot.room.title}に参加してください。`,
+      '',
+      '1. 下のURLを開くか、会場のQRコードを読み取ってください。',
+      '2. 合言葉を入力してください。',
+      '3. 表示名を入力して「参加する」を押してください。',
+      '',
+      `参加URL：${publicUrl}`,
+      `参加コード：${snapshot.room.code}`,
+    ].join('\n');
+  }
 
   function unlock(event: FormEvent) {
     event.preventDefault();
@@ -109,6 +135,26 @@ export function HostPage() {
         </div>
         <div className="qrBox">
           <QRCodeSVG value={publicUrl} size={150} />
+        </div>
+      </div>
+
+      <div className="panel inviteTools">
+        <div>
+          <span className="label">参加者への案内</span>
+          <h2>管理画面を見せずに案内できます</h2>
+          <p className="muted">別タブで案内専用画面を開くか、案内文をコピーしてLINEやメールに貼り付けます。</p>
+          {copyMessage && <p className="successMessage">{copyMessage}</p>}
+        </div>
+        <div className="inviteActions">
+          <a className="button primary" href={inviteUrl} rel="noreferrer" target="_blank">
+            参加案内を開く
+          </a>
+          <button className="button secondary" type="button" onClick={() => copyText(buildInviteMessage(), '案内文をコピーしました。')}>
+            案内文をコピー
+          </button>
+          <button className="button secondary" type="button" onClick={() => copyText(publicUrl, '参加URLをコピーしました。')}>
+            参加URLをコピー
+          </button>
         </div>
       </div>
 

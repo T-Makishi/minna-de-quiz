@@ -10,6 +10,7 @@ import { AppSettingsPage } from './pages/AppSettingsPage';
 import { CreateRoomPage } from './pages/CreateRoomPage';
 import { HomePage } from './pages/HomePage';
 import { HostPage } from './pages/HostPage';
+import { InvitePage } from './pages/InvitePage';
 import { PlayPage } from './pages/PlayPage';
 import { QuestionsPage } from './pages/QuestionsPage';
 import './styles.css';
@@ -24,6 +25,7 @@ const router = createHashRouter([
       { path: 'host/create', element: <CreateRoomPage /> },
       { path: 'host/:roomId', element: <HostPage /> },
       { path: 'host/:roomId/questions', element: <QuestionsPage /> },
+      { path: 'invite/:roomCode', element: <InvitePage /> },
       { path: 'play/:roomCode', element: <PlayPage /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
