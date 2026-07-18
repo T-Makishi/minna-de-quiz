@@ -850,3 +850,68 @@ textarea:focus {
     width: 100%;
   }
 }
+
+@media print {
+  @page {
+    margin: 12mm;
+    size: auto;
+  }
+
+  :root,
+  body,
+  .app {
+    background: white;
+  }
+
+  .topbar {
+    display: none;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .inviteScreen {
+    align-items: flex-start;
+    display: block;
+    min-height: 0;
+  }
+
+  .inviteCard {
+    border: 1px solid #d9d2c3;
+    box-shadow: none;
+    gap: 16px;
+    max-width: none;
+    padding: 16mm;
+    page-break-inside: avoid;
+  }
+
+  .inviteCard h1 {
+    font-size: 28pt;
+  }
+
+  .inviteLead,
+  .inviteSteps ol {
+    font-size: 11pt;
+  }
+
+  .inviteMain {
+    gap: 16mm;
+    grid-template-columns: 1fr auto;
+  }
+
+  .inviteCodeBox {
+    margin: 12mm 0 4mm;
+    padding: 8mm;
+  }
+
+  .inviteCodeBox strong {
+    font-size: 32pt;
+  }
+
+  .inviteQr {
+    box-shadow: none;
+    padding: 8mm;
+  }
+}
