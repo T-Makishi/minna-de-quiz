@@ -566,6 +566,13 @@ textarea:focus {
   margin: 0 0 6px;
 }
 
+.sectionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .hostQuestionItems {
   display: grid;
   gap: 10px;
@@ -616,6 +623,143 @@ textarea:focus {
 .hostQuestionItem small {
   color: #61706d;
   font-weight: 800;
+}
+
+.printSheetPage {
+  display: grid;
+  gap: 18px;
+}
+
+.printToolbar {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.printToolbar h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  margin: 0 0 6px;
+}
+
+.printActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.printSheet {
+  background: #fffdf8;
+  border: 1px solid #e3ded2;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(51, 45, 34, 0.08);
+  padding: 22px;
+}
+
+.printSheetHeader {
+  align-items: start;
+  border-bottom: 2px solid #e3ded2;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+}
+
+.printSheetHeader h2 {
+  font-size: 1.8rem;
+  margin: 4px 0 0;
+}
+
+.printSheetHeader p {
+  color: #2c6e5b;
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.printQuestionGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.printQuestionCard {
+  background: #faf7ef;
+  border: 1px solid #e7dfcf;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.printQuestionHead {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.printQuestionHead span {
+  background: #2c6e5b;
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-weight: 900;
+  padding: 5px 9px;
+}
+
+.printQuestionHead strong {
+  font-size: 1.1rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.printNote,
+.printExplanation {
+  line-height: 1.6;
+  margin: 0;
+}
+
+.printQuestionImage {
+  border-radius: 6px;
+  max-height: 150px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.printOptions {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.printAnswer {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.printAnswer div {
+  background: white;
+  border: 1px solid #e3ded2;
+  border-radius: 6px;
+  padding: 7px;
+}
+
+.printAnswer dt {
+  color: #61706d;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.printAnswer dd {
+  font-weight: 900;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
 }
 
 .twoColumns {
@@ -987,6 +1131,27 @@ textarea:focus {
     flex-direction: column;
   }
 
+  .sectionActions,
+  .printActions {
+    justify-content: stretch;
+  }
+
+  .sectionActions .button,
+  .printActions .button {
+    flex: 1;
+  }
+
+  .printToolbar,
+  .printSheetHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .printQuestionGrid,
+  .printAnswer {
+    grid-template-columns: 1fr;
+  }
+
   .hostQuestionItem {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -1085,5 +1250,73 @@ textarea:focus {
   .inviteQr {
     box-shadow: none;
     padding: 8mm;
+  }
+}
+
+@media print {
+  @page printSheet {
+    margin: 8mm;
+    size: A4 landscape;
+  }
+
+  .printSheetPage {
+    display: block;
+    page: printSheet;
+  }
+
+  .printToolbar,
+  .printActions {
+    display: none;
+  }
+
+  .printSheet {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .printSheetHeader {
+    margin-bottom: 6mm;
+    padding-bottom: 3mm;
+  }
+
+  .printSheetHeader h2 {
+    font-size: 18pt;
+  }
+
+  .printQuestionGrid {
+    gap: 4mm;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .printQuestionCard {
+    break-inside: avoid;
+    gap: 2.5mm;
+    padding: 4mm;
+    page-break-inside: avoid;
+  }
+
+  .printQuestionHead strong {
+    font-size: 11pt;
+    line-height: 1.35;
+  }
+
+  .printOptions,
+  .printNote,
+  .printExplanation {
+    font-size: 9pt;
+  }
+
+  .printAnswer {
+    gap: 2mm;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .printAnswer div {
+    padding: 2mm;
+  }
+
+  .printQuestionImage {
+    max-height: 28mm;
   }
 }

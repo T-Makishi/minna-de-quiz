@@ -1,0 +1,88 @@
+import { Link, useParams } from 'react-router-dom';
+import { formatTimeLimit, typeLabels } from '../lib/quiz';
+import { useRoomSnapshot } from '../hooks/useRoomSnapshot';
+
+export function QuestionPrintPage() {
+  const { roomId = '' } = useParams();
+  const { snapshot, loading, error } = useRoomSnapshot(roomId);
+  const questions = (snapshot?.questions || [])
+    .filter((question) => !question.draft)
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  if (loading) return <div className="panel narrow">読み込み中...</div>;
+  if (error || !snapshot) return <div className="panel narrow error">{error || 'ルームが見つかりません。'}</div>;
+
+  return (
+    <section className="printSheetPage">
+      <div className="printToolbar">
+        <div>
+          <h1>印刷用問題一覧</h1>
+          <p>{snapshot.room.title}</p>
+        </div>
+        <div className="printActions">
+          <Link className="button secondary" to={`/host/${roomId}`}>
+            管理画面へ
+          </Link>
+          <button className="button primary" type="button" onClick={() => window.print()}>
+            印刷する
+          </button>
+        </div>
+      </div>
+
+      <article className="printSheet">
+        <header className="printSheetHeader">
+          <div>
+            <span className="label">クイズ大会</span>
+            <h2>{snapshot.room.title}</h2>
+          </div>
+          <p>{questions.length}問</p>
+        </header>
+
+        <div className="printQuestionGrid">
+          {questions.map((question, index) => (
+            <section className="printQuestionCard" key={question.id}>
+              <div className="printQuestionHead">
+                <span>問{index + 1}</span>
+                <strong>{question.prompt || '無題の問題'}</strong>
+              </div>
+              {question.note && <p className="printNote">{question.note}</p>}
+              {question.imageUrl && <img className="printQuestionImage" src={question.imageUrl} alt={`問${index + 1}の画像`} />}
+              {question.type !== 'text' && (
+                <ol className="printOptions">
+                  {question.options.map((option) => (
+                    <li key={option}>{option}</li>
+                  ))}
+                </ol>
+              )}
+              <dl className="printAnswer">
+                <div>
+                  <dt>形式</dt>
+                  <dd>{typeLabels[question.type]}</dd>
+                </div>
+                <div>
+                  <dt>正解</dt>
+                  <dd>{question.correctAnswer || '未設定'}</dd>
+                </div>
+                <div>
+                  <dt>制限</dt>
+                  <dd>{formatTimeLimit(question.timeLimit)}</dd>
+                </div>
+                <div>
+                  <dt>得点</dt>
+                  <dd>{question.points}点</dd>
+                </div>
+              </dl>
+              {question.explanation && (
+                <p className="printExplanation">
+                  <strong>解説：</strong>
+                  {question.explanation}
+                </p>
+              )}
+            </section>
+          ))}
+          {questions.length === 0 && <p className="muted">印刷できる問題がありません。</p>}
+        </div>
+      </article>
+    </section>
+  );
+}

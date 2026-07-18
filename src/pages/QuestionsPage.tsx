@@ -164,9 +164,14 @@ export function QuestionsPage() {
           <h1>問題作成・編集</h1>
           <p>{snapshot.room.title}</p>
         </div>
-        <Link className="button secondary" to={`/host/${roomId}`}>
-          管理画面へ
-        </Link>
+        <div className="sectionActions">
+          <Link className="button secondary" to={`/host/${roomId}/print`}>
+            印刷用ページ
+          </Link>
+          <Link className="button secondary" to={`/host/${roomId}`}>
+            管理画面へ
+          </Link>
+        </div>
       </div>
 
       <form className="panel questionForm" onSubmit={(event) => save(event, false)}>

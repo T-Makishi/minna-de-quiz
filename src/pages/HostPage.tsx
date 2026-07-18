@@ -234,9 +234,14 @@ export function HostPage() {
             <h2>問題一覧</h2>
             <p className="muted">進行中の問題を確認しながら進められます。</p>
           </div>
-          <Link className="button secondary small" to={`/host/${roomId}/questions`}>
-            問題を編集
-          </Link>
+          <div className="sectionActions">
+            <Link className="button secondary small" to={`/host/${roomId}/print`}>
+              印刷用ページ
+            </Link>
+            <Link className="button secondary small" to={`/host/${roomId}/questions`}>
+              問題を編集
+            </Link>
+          </div>
         </div>
         <div className="hostQuestionItems">
           {liveQuestions.map((item, index) => (
