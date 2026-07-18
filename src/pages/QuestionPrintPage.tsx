@@ -53,16 +53,23 @@ export function QuestionPrintPage() {
         {mode === 'participant' ? (
           <div className="participantPrintPages">
             {questions.map((question, index) => (
-              <section className="participantPrintQuestion" key={question.id}>
-                <span>問題 {index + 1}</span>
-                <h3>{question.prompt || '無題の問題'}</h3>
-                {question.note && <p>{question.note}</p>}
-                {question.type !== 'text' && (
-                  <ol>
-                    {question.options.map((option, optionIndex) => (
-                      <li key={`${optionIndex}-${option}`}>{stripChoicePrefix(option)}</li>
-                    ))}
-                  </ol>
+              <section className={`participantPrintQuestion ${question.imageUrl ? 'withImage' : ''}`} key={question.id}>
+                <div className="participantPrintContent">
+                  <span>問題 {index + 1}</span>
+                  <h3>{question.prompt || '無題の問題'}</h3>
+                  {question.note && <p>{question.note}</p>}
+                  {question.type !== 'text' && (
+                    <ol>
+                      {question.options.map((option, optionIndex) => (
+                        <li key={`${optionIndex}-${option}`}>{stripChoicePrefix(option)}</li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+                {question.imageUrl && (
+                  <figure className="participantPrintImage">
+                    <img src={question.imageUrl} alt={`問題${index + 1}の画像`} />
+                  </figure>
                 )}
               </section>
             ))}
