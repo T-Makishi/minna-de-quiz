@@ -6,7 +6,11 @@ import { activeQuestion, buildRanking, formatTimeLimit, statusLabels } from '../
 import { loadHostPin, saveHostPin } from '../lib/storage';
 import { useRoomSnapshot } from '../hooks/useRoomSnapshot';
 import { Ranking } from '../ui/Ranking';
-import { QuizStatus } from '../types';
+import { Question, QuizStatus } from '../types';
+
+function questionSummary(question: Question | undefined, fallback: string) {
+  return question ? question.prompt || '無題の問題' : fallback;
+}
 
 export function HostPage() {
   const { roomId = '' } = useParams();
@@ -19,6 +23,14 @@ export function HostPage() {
   const publicUrl = snapshot ? `${window.location.origin}${import.meta.env.BASE_URL}#/play/${snapshot.room.code}` : '';
   const inviteUrl = snapshot ? `${window.location.origin}${import.meta.env.BASE_URL}#/invite/${snapshot.room.code}` : '';
   const question = snapshot ? activeQuestion(snapshot.room, snapshot.questions) : undefined;
+  const liveQuestions = useMemo(
+    () => (snapshot ? snapshot.questions.filter((item) => !item.draft).sort((a, b) => a.orderIndex - b.orderIndex) : []),
+    [snapshot],
+  );
+  const previousQuestion = snapshot && snapshot.room.currentQuestionIndex > 0
+    ? liveQuestions[snapshot.room.currentQuestionIndex - 1]
+    : undefined;
+  const nextLiveQuestion = snapshot ? liveQuestions[snapshot.room.currentQuestionIndex + 1] : undefined;
   const ranking = useMemo(
     () => (snapshot ? buildRanking(snapshot.room, snapshot.participants, snapshot.answers) : []),
     [snapshot],
@@ -159,11 +171,28 @@ export function HostPage() {
       </div>
 
       <div className="panel currentBox">
-        <span className="label">現在の問題</span>
-        <h2>
-          {question ? `${snapshot.room.currentQuestionIndex + 1}. ${question.prompt}` : '問題がまだありません'}
-        </h2>
-        <p>{question ? `${formatTimeLimit(question.timeLimit)} / ${question.points}点` : '問題編集画面で追加してください。'}</p>
+        <div className="questionProgressHead">
+          <div>
+            <span className="label">進行中の問題</span>
+            <h2>
+              {question ? `${snapshot.room.currentQuestionIndex + 1}. ${question.prompt}` : '問題がまだありません'}
+            </h2>
+            <p>{question ? `${formatTimeLimit(question.timeLimit)} / ${question.points}点` : '問題編集画面で追加してください。'}</p>
+          </div>
+          <strong className="progressCount">
+            {liveQuestions.length ? `${snapshot.room.currentQuestionIndex + 1} / ${liveQuestions.length}` : '0 / 0'}
+          </strong>
+        </div>
+        <div className="questionProgressGrid">
+          <div>
+            <span className="label">前の問題</span>
+            <p>{questionSummary(previousQuestion, '前の問題はありません')}</p>
+          </div>
+          <div>
+            <span className="label">次の問題</span>
+            <p>{questionSummary(nextLiveQuestion, '次の問題はありません')}</p>
+          </div>
+        </div>
       </div>
 
       <div className="panel controlGrid">
@@ -178,9 +207,6 @@ export function HostPage() {
         </button>
         <button className="button secondary" onClick={() => setStatus('revealed')}>
           正解公開
-        </button>
-        <button className="button secondary" onClick={() => setStatus('revealed')}>
-          結果表示
         </button>
         <button className="button secondary" onClick={() => setStatus('ranking')} disabled={!snapshot.room.useRanking}>
           ランキング表示

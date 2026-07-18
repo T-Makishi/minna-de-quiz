@@ -416,6 +416,44 @@ textarea:focus {
   margin: 8px 0;
 }
 
+.questionProgressHead {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.progressCount {
+  background: #e4efe9;
+  border: 1px solid #b9d5c8;
+  border-radius: 999px;
+  color: #245443;
+  display: inline-flex;
+  font-size: 1rem;
+  padding: 8px 12px;
+}
+
+.questionProgressGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.questionProgressGrid > div {
+  background: #faf7ef;
+  border: 1px solid #e7dfcf;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.questionProgressGrid p {
+  font-weight: 900;
+  line-height: 1.5;
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+
 .controlGrid {
   display: grid;
   gap: 10px;
@@ -742,6 +780,8 @@ textarea:focus {
   .roomInfo,
   .inviteTools,
   .inviteMain,
+  .questionProgressHead,
+  .questionProgressGrid,
   .controlGrid,
   .formGrid,
   .questionForm,
