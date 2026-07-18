@@ -62,7 +62,7 @@ function JoinCard({
       <div className="pageHead">
         <h1>クイズに参加</h1>
         <p>参加コード：{roomCode}</p>
-        </div>
+      </div>
       <form className="panel formGrid" onSubmit={join}>
         <label>
           参加者のお名前

@@ -11,8 +11,10 @@ export function AppShell() {
   const location = useLocation();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [unlocked, setUnlocked] = useState(false);
-  const isInvitePage = location.pathname.startsWith('/invite/');
-  const showAdminActions = location.pathname.startsWith('/host') || location.pathname.startsWith('/settings');
+  const hashPath = window.location.hash.replace(/^#/, '').split('?')[0] || location.pathname;
+  const routePath = location.pathname === '/' && hashPath !== '/' ? hashPath : location.pathname;
+  const isInvitePage = routePath.startsWith('/invite/');
+  const showAdminActions = routePath.startsWith('/host') || routePath.startsWith('/settings');
 
   async function refreshSettings() {
     const next = await api.getAppSettings();
