@@ -12,6 +12,7 @@ export function AppShell() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [unlocked, setUnlocked] = useState(false);
   const isInvitePage = location.pathname.startsWith('/invite/');
+  const showAdminActions = location.pathname.startsWith('/host') || location.pathname.startsWith('/settings');
 
   async function refreshSettings() {
     const next = await api.getAppSettings();
@@ -52,7 +53,7 @@ export function AppShell() {
             <span className="brandMark">問</span>
             <span>{settings.homeCopy.title}</span>
           </Link>
-          {!isInvitePage && (
+          {showAdminActions && (
             <div className="topbarActions">
               <span className="syncBadge">{isSupabaseEnabled ? 'Supabase同期' : 'ローカル体験版'}</span>
               <Link className="textButton" to="/settings">

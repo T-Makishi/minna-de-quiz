@@ -9,7 +9,7 @@ export const defaultHomeCopy: HomeCopy = {
   joinButton: 'クイズに参加する',
   joinTitle: 'クイズに参加',
   codeLabel: '参加コード',
-  nameLabel: '表示名',
+  nameLabel: '参加者のお名前',
   joinSubmit: '参加する',
   joinNote: 'QRコードを読み取った場合も、この画面から名前だけで参加できます。',
 };

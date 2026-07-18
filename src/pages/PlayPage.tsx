@@ -34,7 +34,7 @@ function JoinCard({
     event.preventDefault();
     const displayName = normalizeName(name);
     if (!displayName) {
-      setError('表示名を入力してください。');
+      setError('参加者のお名前を入力してください。');
       return;
     }
     setJoining(true);
@@ -62,11 +62,11 @@ function JoinCard({
       <div className="pageHead">
         <h1>クイズに参加</h1>
         <p>参加コード：{roomCode}</p>
-      </div>
+        </div>
       <form className="panel formGrid" onSubmit={join}>
         <label>
-          表示名
-          <input autoFocus maxLength={24} value={name} onChange={(event) => setName(event.target.value)} />
+          参加者のお名前
+          <input autoFocus maxLength={24} placeholder="例：まきし" value={name} onChange={(event) => setName(event.target.value)} />
         </label>
         {error && <p className="error wide">{error}</p>}
         <button className="button primary full large wide" disabled={joining} type="submit">

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { normalizeCode, normalizeName } from '../lib/quiz';
 
@@ -7,6 +7,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const { settings } = useAppSettings();
   const { homeCopy } = settings;
+  const nameLabel = homeCopy.nameLabel === '表示名' ? '参加者のお名前' : homeCopy.nameLabel;
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +21,7 @@ export function HomePage() {
       return;
     }
     if (!participantName) {
-      setError('表示名を入力してください。');
+      setError('参加者のお名前を入力してください。');
       return;
     }
     navigate(`/play/${roomCode}?name=${encodeURIComponent(participantName)}`);
@@ -32,14 +33,6 @@ export function HomePage() {
         <p className="eyebrow">{homeCopy.eyebrow}</p>
         <h1>{homeCopy.title}</h1>
         <p>{homeCopy.description}</p>
-        <div className="heroActions">
-          <Link className="button primary large" to="/host/create">
-            {homeCopy.hostButton}
-          </Link>
-          <a className="button secondary large" href="#join">
-            {homeCopy.joinButton}
-          </a>
-        </div>
       </div>
 
       <form className="panel joinPanel" id="join" onSubmit={join}>
@@ -55,10 +48,10 @@ export function HomePage() {
           />
         </label>
         <label>
-          {homeCopy.nameLabel}
+          {nameLabel}
           <input
             maxLength={24}
-            placeholder="例：たなか"
+            placeholder="例：まきし"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
