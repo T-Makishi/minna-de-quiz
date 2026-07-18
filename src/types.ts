@@ -75,6 +75,7 @@ export type RoomSnapshot = {
 export type RoomSummary = {
   room: Room;
   questionCount: number;
+  participantCount: number;
 };
 
 export type RankingRow = {

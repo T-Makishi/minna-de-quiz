@@ -108,6 +108,7 @@ const localApi = {
       .map((room) => ({
         room,
         questionCount: db.questions.filter((question) => question.roomId === room.id && !question.draft).length,
+        participantCount: db.participants.filter((participant) => participant.roomId === room.id).length,
       }));
   },
   async copyQuestions(sourceRoomId: string, targetRoomId: string, startIndex = 0) {
@@ -413,20 +414,26 @@ const supabaseApi = supabase
         throw new Error('参加コードを作成できませんでした。もう一度お試しください。');
       },
       async listRooms(): Promise<RoomSummary[]> {
-        const [roomsRes, questionsRes] = await Promise.all([
+        const [roomsRes, questionsRes, participantsRes] = await Promise.all([
           supabase.from('rooms').select('*').order('created_at', { ascending: false }),
           supabase.from('questions').select('room_id,draft'),
+          supabase.from('participants').select('room_id'),
         ]);
         const questionCounts = new Map<string, number>();
         for (const question of questionsRes.data || []) {
           if (question.draft) continue;
           questionCounts.set(question.room_id, (questionCounts.get(question.room_id) || 0) + 1);
         }
+        const participantCounts = new Map<string, number>();
+        for (const participant of participantsRes.data || []) {
+          participantCounts.set(participant.room_id, (participantCounts.get(participant.room_id) || 0) + 1);
+        }
         return (roomsRes.data || []).map((row) => {
           const room = toRoom(row);
           return {
             room,
             questionCount: questionCounts.get(room.id) || 0,
+            participantCount: participantCounts.get(room.id) || 0,
           };
         });
       },

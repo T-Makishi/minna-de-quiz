@@ -62,6 +62,9 @@ export function AppShell() {
               <Link className="textButton" to="/settings">
                 アプリ設定
               </Link>
+              <Link className="textButton" to="/host/codes">
+                参加コード管理
+              </Link>
               {isAccessLockEnabled(settings.accessPassphraseHash) && (
                 <button
                   className="textButton"
