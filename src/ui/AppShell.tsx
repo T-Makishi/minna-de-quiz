@@ -14,7 +14,8 @@ export function AppShell() {
   const hashPath = window.location.hash.replace(/^#/, '').split('?')[0] || location.pathname;
   const routePath = location.pathname === '/' && hashPath !== '/' ? hashPath : location.pathname;
   const isInvitePage = routePath.startsWith('/invite/');
-  const showAdminActions = routePath.startsWith('/host') || routePath.startsWith('/settings');
+  const isHomePage = routePath === '/';
+  const showAdminActions = isHomePage || routePath.startsWith('/host') || routePath.startsWith('/settings');
 
   async function refreshSettings() {
     const next = await api.getAppSettings();
