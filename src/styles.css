@@ -506,6 +506,76 @@ textarea:focus {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.questionMoveButtons {
+  display: grid;
+  gap: 10px;
+  grid-column: span 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sectionTitleRow {
+  align-items: start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.sectionTitleRow h2 {
+  margin: 0 0 6px;
+}
+
+.hostQuestionItems {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.hostQuestionItem {
+  align-items: center;
+  background: #faf7ef;
+  border: 1px solid #e7dfcf;
+  border-radius: 8px;
+  color: #20302f;
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.hostQuestionItem:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.hostQuestionItem.active {
+  background: #eaf4ef;
+  border-color: #9cc8b6;
+}
+
+.hostQuestionItem span {
+  align-items: center;
+  background: #2c6e5b;
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-size: 0.9rem;
+  font-weight: 900;
+  height: 30px;
+  justify-content: center;
+  width: 30px;
+}
+
+.hostQuestionItem strong {
+  overflow-wrap: anywhere;
+}
+
+.hostQuestionItem small {
+  color: #61706d;
+  font-weight: 800;
+}
+
 .twoColumns {
   display: grid;
   gap: 18px;
@@ -829,6 +899,7 @@ textarea:focus {
   .questionProgressHead,
   .questionProgressGrid,
   .controlGrid,
+  .questionMoveButtons,
   .formGrid,
   .questionForm,
   .optionsEditor,
@@ -867,6 +938,19 @@ textarea:focus {
   .score {
     grid-column: 1 / -1;
     justify-content: start;
+  }
+
+  .sectionTitleRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hostQuestionItem {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .hostQuestionItem small {
+    grid-column: 2;
   }
 
   .topbar {

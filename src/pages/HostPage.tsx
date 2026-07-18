@@ -212,18 +212,56 @@ export function HostPage() {
         <button className="button secondary" onClick={() => setStatus('ranking')} disabled={!snapshot.room.useRanking}>
           ランキング表示
         </button>
-        <button className="button secondary" onClick={() => moveQuestion(-1)} disabled={snapshot.room.currentQuestionIndex <= 0 || !liveQuestions.length}>
-          前の問題へ
-        </button>
-        <button className="button secondary" onClick={() => moveQuestion(1)} disabled={snapshot.room.currentQuestionIndex >= liveQuestions.length - 1 || !liveQuestions.length}>
-          次の問題へ
-        </button>
+        <div className="questionMoveButtons">
+          <button className="button secondary" onClick={() => moveQuestion(-1)} disabled={snapshot.room.currentQuestionIndex <= 0 || !liveQuestions.length}>
+            前の問題へ
+          </button>
+          <button className="button secondary" onClick={() => moveQuestion(1)} disabled={snapshot.room.currentQuestionIndex >= liveQuestions.length - 1 || !liveQuestions.length}>
+            次の問題へ
+          </button>
+        </div>
         <button className="button danger" onClick={() => setStatus('finished')}>
           クイズ終了
         </button>
         <button className="button stop" onClick={emergencyStop}>
           緊急停止
         </button>
+      </div>
+
+      <div className="panel hostQuestionList">
+        <div className="sectionTitleRow">
+          <div>
+            <h2>問題一覧</h2>
+            <p className="muted">進行中の問題を確認しながら進められます。</p>
+          </div>
+          <Link className="button secondary small" to={`/host/${roomId}/questions`}>
+            問題を編集
+          </Link>
+        </div>
+        <div className="hostQuestionItems">
+          {liveQuestions.map((item, index) => (
+            <button
+              className={`hostQuestionItem ${index === snapshot.room.currentQuestionIndex ? 'active' : ''}`}
+              disabled={index === snapshot.room.currentQuestionIndex}
+              key={item.id}
+              onClick={() => {
+                api.updateRoom(roomId, {
+                  currentQuestionIndex: index,
+                  status: 'question',
+                  phaseStartedAt: new Date().toISOString(),
+                }).then(refresh);
+              }}
+              type="button"
+            >
+              <span>{index + 1}</span>
+              <strong>{item.prompt || '無題の問題'}</strong>
+              <small>
+                {formatTimeLimit(item.timeLimit)} / {item.points}点
+              </small>
+            </button>
+          ))}
+          {liveQuestions.length === 0 && <p className="muted">問題編集画面で問題を追加してください。</p>}
+        </div>
       </div>
 
       <div className="twoColumns">
