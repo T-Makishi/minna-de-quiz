@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
-import { createId, formatTimeLimit, typeLabels } from '../lib/quiz';
+import { createId, formatChoiceLabel, formatTimeLimit, stripChoicePrefix, typeLabels } from '../lib/quiz';
 import { useRoomSnapshot } from '../hooks/useRoomSnapshot';
 import { Question, QuestionType } from '../types';
 
@@ -83,6 +83,15 @@ function emptyQuestion(roomId: string, index: number, timeLimit: number, points:
   };
 }
 
+function normalizeChoiceQuestion(question: Question) {
+  if (question.type === 'text' || question.type === 'truefalse') return question;
+  const options = question.options.map(stripChoicePrefix);
+  const correctAnswer = options.includes(stripChoicePrefix(question.correctAnswer))
+    ? stripChoicePrefix(question.correctAnswer)
+    : options[0] || '';
+  return { ...question, options, correctAnswer };
+}
+
 export function QuestionsPage() {
   const { roomId = '' } = useParams();
   const { snapshot, loading, error, refresh } = useRoomSnapshot(roomId);
@@ -115,7 +124,8 @@ export function QuestionsPage() {
   async function save(event: FormEvent, draft = false) {
     event.preventDefault();
     if (!editingQuestion.prompt.trim()) return;
-    await api.saveQuestion({ ...editingQuestion, draft, prompt: editingQuestion.prompt.trim() });
+    const normalizedQuestion = normalizeChoiceQuestion(editingQuestion);
+    await api.saveQuestion({ ...normalizedQuestion, draft, prompt: normalizedQuestion.prompt.trim() });
     setEditing(emptyQuestion(roomId, questions.length + 1, snapshotData.room.defaultTimeLimit, snapshotData.room.pointsPerCorrect));
     refresh();
   }
@@ -207,15 +217,16 @@ export function QuestionsPage() {
               <label key={index}>
                 選択肢 {index + 1}
                 <input
-                  value={option}
+                  value={stripChoicePrefix(option)}
                   onChange={(event) => {
                     const options = editingQuestion.options.map((item, optionIndex) =>
-                      optionIndex === index ? event.target.value : item,
+                      optionIndex === index ? stripChoicePrefix(event.target.value) : stripChoicePrefix(item),
                     );
+                    const currentCorrectAnswer = stripChoicePrefix(editingQuestion.correctAnswer);
                     setEditing({
                       ...editingQuestion,
                       options,
-                      correctAnswer: options.includes(editingQuestion.correctAnswer) ? editingQuestion.correctAnswer : options[0],
+                      correctAnswer: options.includes(currentCorrectAnswer) ? currentCorrectAnswer : options[0],
                     });
                   }}
                 />
@@ -228,12 +239,15 @@ export function QuestionsPage() {
           {editingQuestion.type === 'text' ? (
             <input value={editingQuestion.correctAnswer} onChange={(event) => setEditing({ ...editingQuestion, correctAnswer: event.target.value })} />
           ) : (
-            <select value={editingQuestion.correctAnswer} onChange={(event) => setEditing({ ...editingQuestion, correctAnswer: event.target.value })}>
-              {editingQuestion.options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
+            <select value={stripChoicePrefix(editingQuestion.correctAnswer)} onChange={(event) => setEditing({ ...editingQuestion, correctAnswer: event.target.value })}>
+              {editingQuestion.options.map((option, index) => {
+                const value = editingQuestion.type === 'truefalse' ? option : stripChoicePrefix(option);
+                return (
+                  <option key={`${index}-${value}`} value={value}>
+                    {formatChoiceLabel(editingQuestion, option, index)}
+                  </option>
+                );
+              })}
             </select>
           )}
         </label>
@@ -338,7 +352,7 @@ export function QuestionsPage() {
                 </span>
               </div>
               <div className="miniActions">
-                <button className="button secondary small" onClick={() => setEditing(question)}>
+                <button className="button secondary small" onClick={() => setEditing(normalizeChoiceQuestion(question))}>
                   編集
                 </button>
                 <button className="button secondary small" onClick={() => duplicate(question)}>

@@ -8,6 +8,7 @@ import {
   checkAnswer,
   createId,
   elapsedSince,
+  formatChoiceLabel,
   formatTimer,
   normalizeName,
   statusLabels,
@@ -281,9 +282,9 @@ export function PlayPage() {
             </form>
           ) : (
             <div className="choiceGrid">
-              {question.options.map((option) => (
-                <button className="choiceButton" key={option} onClick={() => submitAnswer(option)}>
-                  {option}
+              {question.options.map((option, index) => (
+                <button className="choiceButton" key={`${index}-${option}`} onClick={() => submitAnswer(option)}>
+                  {formatChoiceLabel(question, option, index)}
                 </button>
               ))}
             </div>

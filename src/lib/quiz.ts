@@ -36,6 +36,17 @@ export function normalizeAnswer(value: string) {
   return value.trim().toLowerCase();
 }
 
+export function stripChoicePrefix(value: string) {
+  return value.trim().replace(/^[A-DＡ-Ｄ1-4]\s*[.．、:：)）]\s*/i, '');
+}
+
+export function formatChoiceLabel(question: Question, option: string, index: number) {
+  if (question.type === 'truefalse') return option;
+  const label = String.fromCharCode(65 + index);
+  const text = stripChoicePrefix(option);
+  return text ? `${label}. ${text}` : label;
+}
+
 export function checkAnswer(question: Question, value: string) {
   if (question.type === 'text') {
     return normalizeAnswer(question.correctAnswer) === normalizeAnswer(value);
