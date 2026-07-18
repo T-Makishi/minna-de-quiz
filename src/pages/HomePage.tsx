@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { normalizeCode, normalizeName } from '../lib/quiz';
 
@@ -27,12 +27,25 @@ export function HomePage() {
     navigate(`/play/${roomCode}?name=${encodeURIComponent(participantName)}`);
   }
 
+  function focusJoinForm() {
+    document.getElementById('join')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.setTimeout(() => document.getElementById('join-code')?.focus(), 350);
+  }
+
   return (
     <section className="homeGrid">
       <div className="heroPanel">
         <p className="eyebrow">{homeCopy.eyebrow}</p>
         <h1>{homeCopy.title}</h1>
         <p>{homeCopy.description}</p>
+        <div className="heroActions">
+          <Link className="button primary large" to="/host/create">
+            {homeCopy.hostButton}
+          </Link>
+          <button className="button secondary large" type="button" onClick={focusJoinForm}>
+            {homeCopy.joinButton}
+          </button>
+        </div>
       </div>
 
       <form className="panel joinPanel" id="join" onSubmit={join}>
@@ -40,6 +53,7 @@ export function HomePage() {
         <label>
           {homeCopy.codeLabel}
           <input
+            id="join-code"
             inputMode="numeric"
             maxLength={6}
             placeholder="123456"
