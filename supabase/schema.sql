@@ -35,7 +35,7 @@ create table if not exists questions (
   room_id uuid not null references rooms(id) on delete cascade,
   prompt text not null,
   note text,
-  type text not null check (type in ('multiple4','multiple2','truefalse','text')),
+  type text not null check (type in ('multiple4','multiple3','multiple2','truefalse','text')),
   options jsonb not null default '[]'::jsonb,
   correct_answer text not null,
   explanation text,

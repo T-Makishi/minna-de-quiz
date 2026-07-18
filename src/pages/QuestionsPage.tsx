@@ -7,6 +7,7 @@ import { Question, QuestionType } from '../types';
 
 const defaultOptions = {
   multiple4: ['A', 'B', 'C', 'D'],
+  multiple3: ['A', 'B', 'C'],
   multiple2: ['A', 'B'],
   truefalse: ['○', '×'],
   text: [''],
@@ -210,6 +211,7 @@ export function QuestionsPage() {
             value={editingQuestion.orderIndex + 1}
             onChange={(event) => setEditing({ ...editingQuestion, orderIndex: Math.max(0, Number(event.target.value) - 1) })}
           />
+          <span className="fieldHelp">大会で表示する順番です。1が最初の問題になります。</span>
         </label>
         {editingQuestion.type !== 'text' && (
           <div className="optionsEditor wide">
@@ -237,7 +239,12 @@ export function QuestionsPage() {
         <label>
           正解
           {editingQuestion.type === 'text' ? (
-            <input value={editingQuestion.correctAnswer} onChange={(event) => setEditing({ ...editingQuestion, correctAnswer: event.target.value })} />
+            <input
+              placeholder="例：希望橋"
+              type="text"
+              value={editingQuestion.correctAnswer}
+              onChange={(event) => setEditing({ ...editingQuestion, correctAnswer: event.target.value })}
+            />
           ) : (
             <select value={stripChoicePrefix(editingQuestion.correctAnswer)} onChange={(event) => setEditing({ ...editingQuestion, correctAnswer: event.target.value })}>
               {editingQuestion.options.map((option, index) => {

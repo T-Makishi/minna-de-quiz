@@ -12,6 +12,7 @@ export const statusLabels: Record<Room['status'], string> = {
 
 export const typeLabels: Record<Question['type'], string> = {
   multiple4: '4択問題',
+  multiple3: '3択問題',
   multiple2: '2択問題',
   truefalse: '○×問題',
   text: '自由記述問題',

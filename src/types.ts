@@ -7,7 +7,7 @@ export type QuizStatus =
   | 'ranking'
   | 'finished';
 
-export type QuestionType = 'multiple4' | 'multiple2' | 'truefalse' | 'text';
+export type QuestionType = 'multiple4' | 'multiple3' | 'multiple2' | 'truefalse' | 'text';
 
 export type Room = {
   id: string;

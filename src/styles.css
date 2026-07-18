@@ -297,8 +297,15 @@ label.historyItem {
 
 .pageHead p,
 .muted,
-.smallNote {
+.smallNote,
+.fieldHelp {
   color: #61706d;
+}
+
+.fieldHelp {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .formGrid,
