@@ -78,9 +78,10 @@ export function HostPage() {
     refresh();
   }
 
-  async function nextQuestion() {
+  async function moveQuestion(delta: number) {
     if (!snapshot) return;
-    const nextIndex = Math.min(snapshot.room.currentQuestionIndex + 1, Math.max(0, snapshot.questions.length - 1));
+    const maxIndex = Math.max(0, liveQuestions.length - 1);
+    const nextIndex = Math.min(Math.max(snapshot.room.currentQuestionIndex + delta, 0), maxIndex);
     await api.updateRoom(roomId, {
       currentQuestionIndex: nextIndex,
       status: 'question',
@@ -211,7 +212,10 @@ export function HostPage() {
         <button className="button secondary" onClick={() => setStatus('ranking')} disabled={!snapshot.room.useRanking}>
           ランキング表示
         </button>
-        <button className="button secondary" onClick={nextQuestion} disabled={!snapshot.questions.length}>
+        <button className="button secondary" onClick={() => moveQuestion(-1)} disabled={snapshot.room.currentQuestionIndex <= 0 || !liveQuestions.length}>
+          前の問題へ
+        </button>
+        <button className="button secondary" onClick={() => moveQuestion(1)} disabled={snapshot.room.currentQuestionIndex >= liveQuestions.length - 1 || !liveQuestions.length}>
           次の問題へ
         </button>
         <button className="button danger" onClick={() => setStatus('finished')}>
