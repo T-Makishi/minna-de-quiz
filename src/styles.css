@@ -188,10 +188,14 @@ main {
   background: #fffaf0;
   border: 1px solid #e3ded2;
   border-radius: 8px;
-  cursor: pointer;
   display: flex;
   gap: 14px;
+  justify-content: space-between;
   padding: 14px;
+}
+
+label.historyItem {
+  cursor: pointer;
 }
 
 .historyItem.selected {
@@ -199,17 +203,31 @@ main {
   border-color: #9cc8b6;
 }
 
-.historyItem input {
+.historyChoice {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  gap: 14px;
+  min-width: 0;
+}
+
+.historyItem input,
+.historyChoice input {
   height: 22px;
+  flex: 0 0 auto;
   width: 22px;
 }
 
-.historyItem span {
+.historyItem > span,
+.historyChoice span {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
-.historyItem small {
+.historyItem small,
+.historyChoice small {
   color: #61706d;
   font-weight: 700;
 }

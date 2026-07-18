@@ -23,6 +23,19 @@ export function CreateRoomPage() {
   const [roomHistory, setRoomHistory] = useState<RoomSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [sourceRoomId, setSourceRoomId] = useState('');
+  const [deletingRoomId, setDeletingRoomId] = useState('');
+
+  async function loadRoomHistory() {
+    setHistoryLoading(true);
+    try {
+      const rooms = await api.listRooms();
+      setRoomHistory(rooms.filter((item) => item.questionCount > 0));
+    } catch {
+      setRoomHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -41,6 +54,25 @@ export function CreateRoomPage() {
       active = false;
     };
   }, []);
+
+  async function deletePastRoom(roomId: string, roomTitle: string) {
+    const ok = window.confirm(
+      `「${roomTitle}」を削除しますか？\n\nこの大会の問題・参加者・回答履歴も削除されます。\nコピーして作成済みの別大会とアプリ設定は削除されません。`,
+    );
+    if (!ok) return;
+    setDeletingRoomId(roomId);
+    setError('');
+    try {
+      await api.deleteRoom(roomId);
+      if (sourceRoomId === roomId) setSourceRoomId('');
+      setRoomHistory((items) => items.filter((item) => item.room.id !== roomId));
+      await loadRoomHistory();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '過去大会を削除できませんでした。');
+    } finally {
+      setDeletingRoomId('');
+    }
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -102,20 +134,30 @@ export function CreateRoomPage() {
               </span>
             </label>
             {roomHistory.map(({ room, questionCount }) => (
-              <label className={`historyItem ${sourceRoomId === room.id ? 'selected' : ''}`} key={room.id}>
-                <input
-                  type="radio"
-                  checked={sourceRoomId === room.id}
-                  name="sourceRoom"
-                  onChange={() => setSourceRoomId(room.id)}
-                />
-                <span>
-                  <strong>{room.title}</strong>
-                  <small>
-                    {questionCount}問 / {new Date(room.createdAt).toLocaleDateString('ja-JP')} 作成
-                  </small>
-                </span>
-              </label>
+              <div className={`historyItem ${sourceRoomId === room.id ? 'selected' : ''}`} key={room.id}>
+                <label className="historyChoice">
+                  <input
+                    type="radio"
+                    checked={sourceRoomId === room.id}
+                    name="sourceRoom"
+                    onChange={() => setSourceRoomId(room.id)}
+                  />
+                  <span>
+                    <strong>{room.title}</strong>
+                    <small>
+                      {questionCount}問 / {new Date(room.createdAt).toLocaleDateString('ja-JP')} 作成
+                    </small>
+                  </span>
+                </label>
+                <button
+                  className="button danger small"
+                  disabled={deletingRoomId === room.id}
+                  onClick={() => deletePastRoom(room.id, room.title)}
+                  type="button"
+                >
+                  {deletingRoomId === room.id ? '削除中...' : '削除'}
+                </button>
+              </div>
             ))}
           </div>
         ) : (

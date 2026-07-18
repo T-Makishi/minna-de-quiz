@@ -91,6 +91,7 @@ alter table app_settings enable row level security;
 create policy "rooms are readable" on rooms for select using (true);
 create policy "rooms can be inserted" on rooms for insert with check (true);
 create policy "rooms can be updated by client app" on rooms for update using (true);
+create policy "rooms can be deleted by client app" on rooms for delete using (true);
 
 create policy "participants readable" on participants for select using (true);
 create policy "participants insertable" on participants for insert with check (true);

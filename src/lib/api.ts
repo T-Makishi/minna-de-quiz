@@ -127,6 +127,14 @@ const localApi = {
     saveDb(db);
     return copied.length;
   },
+  async deleteRoom(roomId: string) {
+    const db = loadDb();
+    db.answers = db.answers.filter((answer) => answer.roomId !== roomId);
+    db.participants = db.participants.filter((participant) => participant.roomId !== roomId);
+    db.questions = db.questions.filter((question) => question.roomId !== roomId);
+    db.rooms = db.rooms.filter((room) => room.id !== roomId);
+    saveDb(db);
+  },
   async getRoomByCode(code: string) {
     return loadDb().rooms.find((room) => room.code === code) || null;
   },
@@ -445,6 +453,10 @@ const supabaseApi = supabase
         const { error: insertError } = await supabase.from('questions').insert(copied);
         if (insertError) throw new Error('過去問をコピーできませんでした。');
         return copied.length;
+      },
+      async deleteRoom(roomId: string) {
+        const { error } = await supabase.from('rooms').delete().eq('id', roomId);
+        if (error) throw new Error('過去大会を削除できませんでした。');
       },
       async getRoomByCode(code: string) {
         const { data } = await supabase.from('rooms').select('*').eq('code', code).maybeSingle();
