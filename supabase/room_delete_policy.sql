@@ -40,3 +40,22 @@ begin
     create policy "answers deletable by client app" on answers for delete using (true);
   end if;
 end $$;
+
+create or replace function public.delete_room_cascade(target_room_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted_count integer;
+begin
+  delete from rooms
+  where id = target_room_id;
+
+  get diagnostics deleted_count = row_count;
+  return deleted_count > 0;
+end;
+$$;
+
+grant execute on function public.delete_room_cascade(uuid) to anon, authenticated;

@@ -462,15 +462,13 @@ const supabaseApi = supabase
         return copied.length;
       },
       async deleteRoom(roomId: string) {
-        const answerDelete = await supabase.from('answers').delete().eq('room_id', roomId);
-        const questionDelete = await supabase.from('questions').delete().eq('room_id', roomId);
-        const participantDelete = await supabase.from('participants').delete().eq('room_id', roomId);
-        const roomDelete = await supabase.from('rooms').delete().eq('id', roomId).select('id');
-        const error = answerDelete.error || questionDelete.error || participantDelete.error || roomDelete.error;
+        const { data: deleted, error } = await supabase.rpc('delete_room_cascade', {
+          target_room_id: roomId,
+        });
         if (error) {
-          throw new Error('過去大会を削除できませんでした。Supabase SQL Editorで room_delete_policy.sql を実行してください。');
+          throw new Error('参加コードを削除できませんでした。Supabase SQL Editorで room_delete_policy.sql を実行してください。');
         }
-        if ((roomDelete.data || []).length === 0) {
+        if (!deleted) {
           const { data: remainingRoom } = await supabase.from('rooms').select('id').eq('id', roomId).maybeSingle();
           if (remainingRoom) {
             throw new Error('参加コードを削除できませんでした。Supabase SQL Editorで room_delete_policy.sql を実行してください。');
