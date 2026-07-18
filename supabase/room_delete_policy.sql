@@ -19,4 +19,24 @@ begin
   ) then
     create policy "participants deletable by client app" on participants for delete using (true);
   end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'questions'
+      and policyname = 'questions deletable by client app'
+  ) then
+    create policy "questions deletable by client app" on questions for delete using (true);
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'answers'
+      and policyname = 'answers deletable by client app'
+  ) then
+    create policy "answers deletable by client app" on answers for delete using (true);
+  end if;
 end $$;
