@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { formatChoiceLabel, formatTimeLimit, typeLabels } from '../lib/quiz';
+import { formatTimeLimit, stripChoicePrefix, typeLabels } from '../lib/quiz';
 import { useRoomSnapshot } from '../hooks/useRoomSnapshot';
 
 type PrintMode = 'participant' | 'host';
@@ -60,7 +60,7 @@ export function QuestionPrintPage() {
                 {question.type !== 'text' && (
                   <ol>
                     {question.options.map((option, optionIndex) => (
-                      <li key={`${optionIndex}-${option}`}>{formatChoiceLabel(question, option, optionIndex)}</li>
+                      <li key={`${optionIndex}-${option}`}>{stripChoicePrefix(option)}</li>
                     ))}
                   </ol>
                 )}
@@ -80,7 +80,7 @@ export function QuestionPrintPage() {
                 {question.type !== 'text' && (
                   <ol className="printOptions">
                     {question.options.map((option, optionIndex) => (
-                      <li key={`${optionIndex}-${option}`}>{formatChoiceLabel(question, option, optionIndex)}</li>
+                      <li key={`${optionIndex}-${option}`}>{stripChoicePrefix(option)}</li>
                     ))}
                   </ol>
                 )}
