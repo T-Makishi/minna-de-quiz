@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { createId, typeLabels } from '../lib/quiz';
@@ -11,6 +11,58 @@ const defaultOptions = {
   truefalse: ['○', '×'],
   text: [''],
 };
+
+const maxUploadBytes = 5 * 1024 * 1024;
+const maxImageSide = 1400;
+const imageQuality = 0.86;
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('画像を読み込めませんでした。'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function imageFileToDataUrl(file: File): Promise<string> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('画像ファイルを選択してください。');
+  }
+  if (file.size > maxUploadBytes) {
+    throw new Error('画像は5MB以下にしてください。');
+  }
+  if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+    return fileToDataUrl(file);
+  }
+
+  const sourceUrl = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = 'async';
+    const loaded = new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error('画像を読み込めませんでした。'));
+    });
+    image.src = sourceUrl;
+    await loaded;
+
+    const scale = Math.min(1, maxImageSide / Math.max(image.naturalWidth, image.naturalHeight));
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('画像を変換できませんでした。');
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', imageQuality);
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
+}
 
 function emptyQuestion(roomId: string, index: number, timeLimit: number, points: number): Question {
   return {
@@ -36,6 +88,7 @@ export function QuestionsPage() {
   const { snapshot, loading, error, refresh } = useRoomSnapshot(roomId);
   const [editing, setEditing] = useState<Question | null>(null);
   const [dragId, setDragId] = useState('');
+  const [imageError, setImageError] = useState('');
   const questions = useMemo(() => snapshot?.questions || [], [snapshot]);
 
   useEffect(() => {
@@ -65,6 +118,19 @@ export function QuestionsPage() {
     await api.saveQuestion({ ...editingQuestion, draft, prompt: editingQuestion.prompt.trim() });
     setEditing(emptyQuestion(roomId, questions.length + 1, snapshotData.room.defaultTimeLimit, snapshotData.room.pointsPerCorrect));
     refresh();
+  }
+
+  async function selectImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setImageError('');
+    try {
+      const imageUrl = await imageFileToDataUrl(file);
+      setEditing({ ...editingQuestion, imageUrl });
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : '画像を挿入できませんでした。');
+    }
   }
 
   async function duplicate(question: Question) {
@@ -174,10 +240,37 @@ export function QuestionsPage() {
           得点
           <input type="number" min={1} value={editingQuestion.points} onChange={(event) => setEditing({ ...editingQuestion, points: Number(event.target.value) })} />
         </label>
-        <label className="wide">
-          画像URL（任意）
-          <input value={editingQuestion.imageUrl} onChange={(event) => setEditing({ ...editingQuestion, imageUrl: event.target.value })} />
-        </label>
+        <div className="wide imageField">
+          <label>
+            画像URL（任意）
+            <input
+              placeholder="https://... または下のボタンから画像を選択"
+              value={editingQuestion.imageUrl}
+              onChange={(event) => {
+                setImageError('');
+                setEditing({ ...editingQuestion, imageUrl: event.target.value });
+              }}
+            />
+          </label>
+          <div className="imageTools">
+            <label className="button secondary imageSelectButton">
+              画像ファイルを選択
+              <input accept="image/*" type="file" onChange={selectImage} />
+            </label>
+            {editingQuestion.imageUrl && (
+              <button className="button secondary" type="button" onClick={() => setEditing({ ...editingQuestion, imageUrl: '' })}>
+                画像を削除
+              </button>
+            )}
+          </div>
+          <p className="smallNote">スマートフォンやパソコン内の画像を選ぶと、自動で軽くして問題に挿入します。</p>
+          {imageError && <p className="error">{imageError}</p>}
+          {editingQuestion.imageUrl && (
+            <div className="imagePreview">
+              <img src={editingQuestion.imageUrl} alt="問題画像のプレビュー" />
+            </div>
+          )}
+        </div>
         <label className="wide">
           正解解説
           <textarea value={editingQuestion.explanation} onChange={(event) => setEditing({ ...editingQuestion, explanation: event.target.value })} />

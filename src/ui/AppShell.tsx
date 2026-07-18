@@ -46,10 +46,10 @@ export function AppShell() {
     <AppSettingsContext.Provider value={{ settings, refreshSettings }}>
       <div className="app">
         <header className="topbar">
-          <a className="brand" href="/">
+          <Link className="brand" to="/">
             <span className="brandMark">問</span>
             <span>{settings.homeCopy.title}</span>
-          </a>
+          </Link>
           <div className="topbarActions">
             <span className="syncBadge">{isSupabaseEnabled ? 'Supabase同期' : 'ローカル体験版'}</span>
             <Link className="textButton" to="/settings">

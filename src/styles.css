@@ -468,6 +468,46 @@ textarea:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.imageField {
+  display: grid;
+  gap: 12px;
+}
+
+.imageTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.imageSelectButton {
+  position: relative;
+}
+
+.imageSelectButton input {
+  height: 1px;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 1px;
+}
+
+.imagePreview {
+  background: #faf7ef;
+  border: 1px solid #e3ded2;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.imagePreview img {
+  border-radius: 8px;
+  display: block;
+  max-height: 280px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 .miniActions {
   display: flex;
   flex-wrap: wrap;
