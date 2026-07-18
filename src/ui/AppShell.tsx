@@ -16,6 +16,7 @@ export function AppShell() {
   const isInvitePage = routePath.startsWith('/invite/');
   const isHomePage = routePath === '/';
   const showAdminActions = isHomePage || routePath.startsWith('/host') || routePath.startsWith('/settings');
+  const showRoomManagementLink = routePath.startsWith('/host') || routePath.startsWith('/settings');
 
   async function refreshSettings() {
     const next = await api.getAppSettings();
@@ -62,9 +63,11 @@ export function AppShell() {
               <Link className="textButton" to="/settings">
                 アプリ設定
               </Link>
-              <Link className="textButton" to="/host/codes">
-                参加コード管理
-              </Link>
+              {showRoomManagementLink && (
+                <Link className="textButton" to="/host/codes">
+                  参加コード管理
+                </Link>
+              )}
               {isAccessLockEnabled(settings.accessPassphraseHash) && (
                 <button
                   className="textButton"
